@@ -10,7 +10,7 @@ const { default: KMSClient, GetSecretValueRequest } = require('@alicloud/kms2016
 const { Config, OpenApiRequest, Params } = require('@alicloud/openapi-client');
 const { default: Credential } = require('@alicloud/credentials');
 const $Util = require('@alicloud/tea-util');
-const OpenApiUtil = require('@alicloud/openapi-util');
+const {default: OpenApiUtil} = require('@alicloud/openapi-util');
 
 // --- Load Environment Variables ---
 // In production, these variables will be set directly in the ECS environment.
@@ -47,7 +47,7 @@ async function getSecretValueRaw(client, request) {
   if (request.versionStage != null) query["VersionStage"] = request.versionStage;
 
   const openapiRequest = new OpenApiRequest({
-    query: OpenApiUtil.query(query),
+    query: query,
   });
 
   const params = new Params({
