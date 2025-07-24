@@ -81,6 +81,8 @@ async function initializeServices() {
                 roleName: process.env.RAM_ROLE_NAME, // set this in your ECS env vars
             });
 
+            const { accessKeyId, accessKeySecret, securityToken } = await cred.getAccessKey();
+
             const config = new Config({
                 credential: cred,
             });
@@ -120,6 +122,9 @@ async function initializeServices() {
                 bucket: OSS_BUCKET,
                 // IMPORTANT: ECS RAM Role provides credentials, no explicit keys needed.
                 endpoint: `${OSS_REGION}-internal.aliyuncs.com`,
+                accessKeyId: accessKeyId,
+                accessKeySecret: accessKeySecret,
+                stsToken: securityToken,
             });
             ossClient.useBucket(OSS_BUCKET);
             console.log('OSS client configured for production (internal endpoint, RAM Role).');
