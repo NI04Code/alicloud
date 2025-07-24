@@ -9,6 +9,7 @@ const multer = require('multer');
 const { default: KMSClient } = require('@alicloud/kms20160120');
 const { Config } = require('@alicloud/openapi-client');
 const { default: Credential } = require('@alicloud/credentials');
+const $Util = require('@alicloud/tea-util');
 
 // --- Load Environment Variables ---
 // In production, these variables will be set directly in the ECS environment.
@@ -59,9 +60,13 @@ async function initializeServices() {
             if (!process.env.APP_CONFIG_SECRET_NAME) {
                 throw new Error("APP_CONFIG_SECRET_NAME environment variable is not set in production.");
             }
-            const appConfigSecretResult = await kmsClient.getSecretValue({
+            const appConfigSecretResult = await kmsClient.getSecretValue(
+                {
                 SecretName: process.env.APP_CONFIG_SECRET_NAME,
-            });
+                },
+                new $Util.RuntimeOptions({})
+            );
+
             const appConfig = JSON.parse(appConfigSecretResult.SecretString);
 
             DATABASE_URL = appConfig.DATABASE_URL;
