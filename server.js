@@ -37,6 +37,37 @@ let LOCAL_DEV_OSS_ACCESS_KEY_SECRET;
 let prisma;
 let ossClient;
 
+async function getSecretValueRaw(client, request) {
+  request.validate();
+
+  const query = {};
+  if (request.secretName != null) query["SecretName"] = request.secretName;
+  if (request.versionId != null) query["VersionId"] = request.versionId;
+  if (request.versionStage != null) query["VersionStage"] = request.versionStage;
+
+  const openapiRequest = new OpenApiRequest({
+    query: OpenApiUtil.query(query),
+  });
+
+  const params = new Params({
+    action: "GetSecretValue",
+    version: "2016-01-20",
+    protocol: "HTTPS",
+    pathname: "/",
+    method: "POST",
+    authType: "AK",
+    style: "RPC",
+    reqBodyType: "formData",
+    bodyType: "json",
+  });
+
+  const runtime = new $Util.RuntimeOptions({});
+  
+  // ⚠️ DO NOT cast the response
+  const rawRes = await client.callApi(params, openapiRequest, runtime);
+  return rawRes;
+}
+
 async function initializeServices() {
     try {
         if (isProduction) {
@@ -61,15 +92,12 @@ async function initializeServices() {
                 throw new Error("APP_CONFIG_SECRET_NAME environment variable is not set in production.");
             }
             const request = new GetSecretValueRequest({
-                SecretName: process.env.APP_CONFIG_SECRET_NAME,
+                secretName: process.env.APP_CONFIG_SECRET_NAME,
             });
-
-
-            const runtime = new $Util.RuntimeOptions({});
             
-            const response = await kmsClient.getSecretValue(request, runtime);
-
-            const appConfig = JSON.parse(response.SecretString);
+            const response = await getSecretValueRaw(kmsClient, request);
+            console.log("Secret value:", response.body.secretData);
+            const appConfig = JSON.parse(response.body.secretData);
 
             DATABASE_URL = appConfig.DATABASE_URL;
             OSS_REGION = appConfig.OSS_REGION;
