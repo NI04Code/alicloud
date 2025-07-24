@@ -100,7 +100,7 @@ async function initializeServices() {
             console.log("Secret value:", response.body.SecretData);
             const appConfig = JSON.parse(response.body.SecretData);
 
-            DATABASE_URL = appConfig.DATABASE_URL;
+            DATABASE_URL = appConfig.DB_URL;
             OSS_REGION = appConfig.OSS_REGION;
             OSS_BUCKET = appConfig.OSS_BUCKET;
             CDN_DOMAIN = appConfig.CDN_DOMAIN;
