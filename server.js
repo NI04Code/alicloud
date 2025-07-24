@@ -81,7 +81,12 @@ async function initializeServices() {
                 roleName: process.env.RAM_ROLE_NAME, // set this in your ECS env vars
             });
 
-            const { accessKeyId, accessKeySecret, securityToken } = await cred.getAccessKey();
+            const {
+            accessKeyId,
+            accessKeySecret,
+            securityToken,
+            type
+            } = await cred.getCredential();
 
             const config = new Config({
                 credential: cred,
