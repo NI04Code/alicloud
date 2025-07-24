@@ -6,7 +6,7 @@ const dotenv = require('dotenv'); // For local development .env file ONLY
 const { PrismaClient } = require('@prisma/client');
 const OSS = require('ali-oss');
 const multer = require('multer');
-const { default: KMSClient } = require('@alicloud/kms20160120');
+const { default: KMSClient, GetSecretValueRequest } = require('@alicloud/kms20160120');
 const { Config } = require('@alicloud/openapi-client');
 const { default: Credential } = require('@alicloud/credentials');
 const $Util = require('@alicloud/tea-util');
@@ -60,14 +60,16 @@ async function initializeServices() {
             if (!process.env.APP_CONFIG_SECRET_NAME) {
                 throw new Error("APP_CONFIG_SECRET_NAME environment variable is not set in production.");
             }
-            const appConfigSecretResult = await kmsClient.getSecretValue(
-                {
+            const request = new GetSecretValueRequest({
                 SecretName: process.env.APP_CONFIG_SECRET_NAME,
-                },
-                new $Util.RuntimeOptions({})
-            );
+            });
 
-            const appConfig = JSON.parse(appConfigSecretResult.SecretString);
+
+            const runtime = new $Util.RuntimeOptions({});
+            
+            const response = await kmsClient.getSecretValue(request, runtime);
+
+            const appConfig = JSON.parse(response.SecretString);
 
             DATABASE_URL = appConfig.DATABASE_URL;
             OSS_REGION = appConfig.OSS_REGION;
