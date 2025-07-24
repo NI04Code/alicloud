@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload New Image</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .upload-form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .upload-form-container h1 {
+            color: #0070c9;
+            margin-bottom: 25px;
+        }
+        .upload-form-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box; /* Include padding in width */
+            font-size: 1em;
+        }
+        .form-group input[type="file"] {
+            padding: 8px; /* Files inputs look better with less padding */
+        }
+        .form-group input[type="file"]::-webkit-file-upload-button {
+            background-color: #0070c9;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .form-group input[type="file"]::-webkit-file-upload-button:hover {
+            background-color: #005aa7;
+        }
+        .upload-form-container button[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .upload-form-container button[type="submit"]:hover {
+            background-color: #218838;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #0070c9;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-form-container">
+            <h1>Upload New Image</h1>
+            <form action="/api/image/post" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Image Title: </label>
+                    <input type="text" id="title" name="title" placeholder="Enter image title">
+                </div>
+                <div class="form-group">
+                    <label for="imageFile">Select Image File:</label>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*" required>
+                </div>
+                <button type="submit">Upload Image</button>
+            </form>
+            <a href="/images" class="back-link">Back to Gallery</a>
+        </div>
+    </div>
+</body>
+</html>

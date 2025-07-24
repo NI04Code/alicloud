@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DB_URL")
+}
+
+model Image {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(255)
+  imageLink  String   @map("image_link") @db.VarChar(255)
+  createdAt  DateTime @default(now())                 
+
+  // Relation field: An Image can have many Comments
+  comments   Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement()) 
+  content   String   @db.Text // NOT NULL, @db.Text is good for potentially longer text
+  createdAt DateTime @default(now())               // Automatically set creation timestamp
+
+  // Foreign Key to Image
+  imageId   Int      @map("image_id") // The foreign key column in the database
+
+  // Relation field: A Comment belongs to one Image
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+                      
+}

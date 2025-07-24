@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Loading Image...</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .image-detail-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .image-detail-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .image-info {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .image-info h2 {
+            color: #0070c9;
+            margin-bottom: 10px;
+        }
+        .image-info p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+            text-align: left;
+        }
+        .comments-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .comment-form textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        .comment-form button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .comment-form button:hover {
+            background-color: #218838;
+        }
+        .comment-list {
+            margin-top: 20px;
+        }
+        .comment-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        .comment-item p {
+            margin: 0 0 5px 0;
+            color: #444;
+        }
+        .comment-item .comment-date {
+            font-size: 0.85em;
+            color: #888;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p><a href="/images">Back to Gallery</a></p>
+
+        <div id="image-detail-content" class="image-detail-container">
+            <p id="loading-message">Loading image details...</p>
+            </div>
+
+        <div id="comments-section-content" class="comments-section">
+            <h3>Comments</h3>
+            <div class="comment-form">
+                <form id="commentForm">
+                    <textarea id="commentContent" name="content" placeholder="Add your comment..." required></textarea>
+                    <button type="submit">Post Comment</button>
+                </form>
+            </div>
+            <div id="comment-list" class="comment-list">
+                <p id="no-comments-message">No comments yet. Be the first to comment!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pageTitle = document.getElementById('pageTitle');
+        const imageDetailContent = document.getElementById('image-detail-content');
+        const loadingMessage = document.getElementById('loading-message');
+        const commentForm = document.getElementById('commentForm');
+        const commentContentInput = document.getElementById('commentContent');
+        const commentList = document.getElementById('comment-list');
+        const noCommentsMessage = document.getElementById('no-comments-message');
+
+        // Declare currentImageId here so it's accessible throughout the script
+        let currentImageId; 
+
+        async function fetchImageDetails(imageId) {
+            loadingMessage.style.display = 'block';
+            imageDetailContent.innerHTML = ''; // Clear previous content
+            commentList.innerHTML = ''; // Clear previous comments
+            noCommentsMessage.style.display = 'none'; // Hide initial no comments message
+
+            try {
+                const response = await fetch(`/api/image/${imageId}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        imageDetailContent.innerHTML = '<p>Image not found.</p>';
+                        pageTitle.textContent = 'Image Not Found';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const image = await response.json();
+
+                pageTitle.textContent = image.title + ' - Detail';
+
+                // Render image details
+                imageDetailContent.innerHTML = `
+                    <img src="${image.cdn_url}" alt="${image.title}">
+                    <div class="image-info">
+                        <h2>${image.title}</h2>
+                        <p>Uploaded: ${new Date(image.createdAt).toLocaleString()}</p>
+                    </div>
+                `;
+
+                // Render comments
+                if (image.comments && image.comments.length > 0) {
+                    image.comments.forEach(comment => {
+                        const commentItem = document.createElement('div');
+                        commentItem.className = 'comment-item';
+                        commentItem.innerHTML = `
+                            <p>${comment.content}</p>
+                            <p class="comment-date">${new Date(comment.createdAt).toLocaleString()}</p>
+                        `;
+                        commentList.appendChild(commentItem);
+                    });
+                } else {
+                    noCommentsMessage.style.display = 'block'; // Show if no comments
+                }
+
+            } catch (error) {
+                console.error('Error fetching image details:', error);
+                imageDetailContent.innerHTML = '<p>Failed to load image details. Please try again later.</p>';
+            } finally {
+                loadingMessage.style.display = 'none'; // Hide loading message
+            }
+        }
+
+        // Handle comment form submission
+        commentForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const content = commentContentInput.value.trim();
+            if (!content) {
+                alert('Comment cannot be empty!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/comment/post`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    // *** THIS IS THE CORRECTED LINE ***
+                    body: JSON.stringify({ content: content, imageId: currentImageId }) 
+                });
+
+                if (!response.ok) {
+                    // It's good practice to try and read the error message from the response body
+                    const errorData = await response.json(); 
+                    throw new Error(errorData.error || `Failed to post comment: ${response.statusText}`);
+                }
+
+                // If successful, clear input and re-fetch comments
+                commentContentInput.value = '';
+                // Re-fetch details to update the comments list dynamically
+                await fetchImageDetails(currentImageId); 
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                alert(`Failed to post comment: ${error.message}`); // Show the specific error
+            }
+        });
+
+        // Initial load of image details when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const pathParts = window.location.pathname.split('/');
+            currentImageId = parseInt(pathParts[pathParts.length - 1]); // Get ID from URL
+
+            if (isNaN(currentImageId)) {
+                imageDetailContent.innerHTML = '<p>Invalid image ID in URL.</p>';
+                pageTitle.textContent = 'Invalid Image ID';
+                loadingMessage.style.display = 'none';
+                return;
+            }
+            fetchImageDetails(currentImageId);
+        });
+    </script>
+</body>
+</html>

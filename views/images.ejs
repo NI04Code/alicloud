@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Basic styling for the gallery */
+        .gallery-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .gallery-item {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 300px;
+            text-align: center;
+            padding-bottom: 15px;
+            transition: transform 0.2s ease-in-out;
+        }
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+        .gallery-item img {
+            max-width: 100%;
+            height: 200px; /* Fixed height for consistency */
+            object-fit: cover; /* Ensures image covers area without distortion */
+            display: block;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .gallery-item h3 {
+            font-size: 1.2em;
+            margin: 0 10px 10px;
+            color: #333;
+        }
+        .gallery-item p {
+            font-size: 0.9em;
+            color: #777;
+            margin: 0 10px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+        .pagination button {
+            background-color: #0070c9;
+            color: white;
+            padding: 10px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .pagination button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: #005aa7;
+        }
+        .pagination span {
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Gallery</h1>
+        <p><a href="/">Back to Home</a> | <a href="/image/upload">Upload New Image</a></p>
+
+        <div id="image-gallery" class="gallery-container">
+            <p id="loading-message">Loading images...</p>
+        </div>
+
+        <div class="pagination">
+            <button id="prevPage">Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextPage">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const imageGallery = document.getElementById('image-gallery');
+        const loadingMessage = document.getElementById('loading-message');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageInfoSpan = document.getElementById('pageInfo');
+
+        let currentPage = 1;
+        const limit = 10; // You can make this dynamic if needed
+
+        async function fetchImages(page) {
+            loadingMessage.style.display = 'block'; // Show loading message
+            imageGallery.innerHTML = ''; // Clear previous images
+            pageInfoSpan.textContent = `Loading...`;
+            prevPageBtn.disabled = true;
+            nextPageBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/images?page=${page}&limit=${limit}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.images.length === 0) {
+                    imageGallery.innerHTML = '<p>No images found.</p>';
+                } else {
+                    data.images.forEach(image => {
+                        const galleryItem = document.createElement('div');
+                        galleryItem.className = 'gallery-item';
+                        galleryItem.innerHTML = `
+                            <a href="/image/${image.id}">
+                                <img src="${image.cdn_url}" alt="${image.title}">
+                            </a>
+                            <h3><a href="/image/${image.id}">${image.title}</a></h3>
+                            <p>Uploaded: ${new Date(image.createdAt).toLocaleDateString()}</p>
+                        `;
+                        imageGallery.appendChild(galleryItem);
+                    });
+                }
+
+                // Update pagination controls
+                currentPage = data.currentPage;
+                pageInfoSpan.textContent = `Page ${data.currentPage} of ${data.totalPages}`;
+                prevPageBtn.disabled = !data.hasPreviousPage;
+                nextPageBtn.disabled = !data.hasNextPage;
+
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                imageGallery.innerHTML = '<p>Failed to load images. Please try again later.</p>';
+                pageInfoSpan.textContent = `Error`;
+            } finally {
+                loadingMessage.style.display = 'none'; // Hide loading message
+            }
+        }
+
+        // Event Listeners for Pagination
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchImages(currentPage - 1);
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            fetchImages(currentPage + 1);
+        });
+
+        // Initial load of images when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialPage = parseInt(urlParams.get('page')) || 1;
+            fetchImages(initialPage);
+        });
+    </script>
+</body>
+</html>
