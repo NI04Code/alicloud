@@ -7,7 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const OSS = require('ali-oss');
 const multer = require('multer');
 const { default: KMSClient, GetSecretValueRequest } = require('@alicloud/kms20160120');
-const { Config, OpenApiRequest } = require('@alicloud/openapi-client');
+const { Config, OpenApiRequest, OpenApiUtil } = require('@alicloud/openapi-client');
 const { default: Credential } = require('@alicloud/credentials');
 const $Util = require('@alicloud/tea-util');
 
