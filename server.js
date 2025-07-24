@@ -6,7 +6,7 @@ const dotenv = require('dotenv'); // For local development .env file ONLY
 const { PrismaClient } = require('@prisma/client');
 const OSS = require('ali-oss');
 const multer = require('multer');
-const KMSClient = require('@alicloud/kms20160120');
+const { default: KMSClient } = require('@alicloud/kms20160120');
 const { Config } = require('@alicloud/openapi-client');
 const { default: Credential } = require('@alicloud/credentials');
 
