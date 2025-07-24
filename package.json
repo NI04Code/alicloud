@@ -10,7 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@alicloud/kms-sdk": "^1.1.0",
+    "@alicloud/credentials": "^2.4.4",
+    "@alicloud/kms20160120": "^2.3.0",
+    "@alicloud/openapi-client": "^0.4.15",
     "@prisma/client": "^6.12.0",
     "ali-oss": "^6.23.0",
     "dotenv": "^17.2.0",

@@ -6,7 +6,9 @@ const dotenv = require('dotenv'); // For local development .env file ONLY
 const { PrismaClient } = require('@prisma/client');
 const OSS = require('ali-oss');
 const multer = require('multer');
-const KMSClient = require('@alicloud/kms-sdk'); // Only used in production
+const KMSClient = require('@alicloud/kms20160120');
+const { default: OpenApi } = require('@alicloud/openapi-client');
+const { default: Credential } = require('@alicloud/credentials');
 
 // --- Load Environment Variables ---
 // In production, these variables will be set directly in the ECS environment.
@@ -41,9 +43,16 @@ async function initializeServices() {
             console.log('Running in PRODUCTION environment. Fetching config from Secrets Manager.');
 
             // 1. Initialize Secrets Manager Client (RAM Role handles authentication)
-            const kmsClient = new KMSClient({
-                endpoint: `kms.ap-southeast-5.aliyuncs.com`,
+            const cred = new Credential({
+                type: 'ecs_ram_role',
+                roleName: process.env.RAM_ROLE_NAME, // set this in your ECS env vars
             });
+
+            const config = new OpenApi.Config({
+                credential: cred,
+                endpoint: 'kms.ap-southeast-5.aliyuncs.com',
+            });
+            const kmsClient = new KMSClient(config);
 
             // 2. Fetch ALL Application Configuration from Secrets Manager
             if (!process.env.APP_CONFIG_SECRET_NAME) {
