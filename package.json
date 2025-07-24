@@ -13,6 +13,7 @@
     "@alicloud/credentials": "^2.4.4",
     "@alicloud/kms20160120": "^2.3.0",
     "@alicloud/openapi-client": "^0.4.15",
+    "@alicloud/openapi-util": "^0.3.2",
     "@alicloud/tea-util": "^1.4.10",
     "@prisma/client": "^6.12.0",
     "ali-oss": "^6.23.0",
