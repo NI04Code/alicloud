@@ -81,12 +81,7 @@ async function initializeServices() {
                 roleName: process.env.RAM_ROLE_NAME, // set this in your ECS env vars
             });
 
-            const {
-            accessKeyId,
-            accessKeySecret,
-            securityToken,
-            type
-            } = await cred.getCredential();
+            const { accessKeyId, accessKeySecret, securityToken } = await cred.getCredential();
 
             const config = new Config({
                 credential: cred,
@@ -130,8 +125,16 @@ async function initializeServices() {
                 accessKeyId: accessKeyId,
                 accessKeySecret: accessKeySecret,
                 stsToken: securityToken,
+                refreshSTSToken: async () => {
+                    const info = await cred.getCredential();;
+                    return {
+                    accessKeyId: info.accessKeyId,
+                    accessKeySecret: info.accessKeySecret,
+                    stsToken: info.securityToken
+                    };
+                },
             });
-            ossClient.useBucket(OSS_BUCKET);
+
             console.log('OSS client configured for production (internal endpoint, RAM Role).');
 
         } else {
@@ -170,7 +173,7 @@ async function initializeServices() {
                 accessKeySecret: LOCAL_DEV_OSS_ACCESS_KEY_SECRET,
                 endpoint: `https://${OSS_REGION}.aliyuncs.com`, // Public endpoint for local dev
             });
-            ossClient.useBucket(OSS_BUCKET);
+            
             console.log('OSS client configured for local development (public endpoint, explicit keys).');
         }
 
