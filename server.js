@@ -21,6 +21,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
+app.set('trust proxy', true);
 // --- Configuration Variables (will be populated based on environment) ---
 // These will be directly populated from process.env in development,
 // or from Secrets Manager in production.
