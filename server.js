@@ -99,7 +99,6 @@ async function initializeServices() {
             });
             
             const response = await getSecretValueRaw(kmsClient, request);
-            console.log("Secret value:", response.body.SecretData);
             const appConfig = JSON.parse(response.body.SecretData);
 
             DATABASE_URL = appConfig.DB_URL;
