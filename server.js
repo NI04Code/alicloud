@@ -10,7 +10,7 @@ const { default: KMSClient, GetSecretValueRequest } = require('@alicloud/kms2016
 const { Config, OpenApiRequest, Params } = require('@alicloud/openapi-client');
 const { default: Credential } = require('@alicloud/credentials');
 const $Util = require('@alicloud/tea-util');
-const {default: OpenApiUtil} = require('@alicloud/openapi-util');
+const nodemailer = require("nodemailer");
 
 dotenv.config();
 
@@ -24,6 +24,7 @@ let DATABASE_URL;
 let OSS_REGION;
 let OSS_BUCKET;
 let CDN_DOMAIN;
+let MAIL_PASSWORD;
 
 // access key (for local dev)
 let LOCAL_DEV_OSS_ACCESS_KEY_ID;
@@ -98,6 +99,7 @@ async function initializeServices() {
             OSS_REGION = appConfig.OSS_REGION;
             OSS_BUCKET = appConfig.OSS_BUCKET;
             CDN_DOMAIN = appConfig.CDN_DOMAIN;
+            MAIL_PASSWORD = appConfig.MAIL_PASSWORD;
 
 
             prisma = new PrismaClient({
@@ -137,6 +139,7 @@ async function initializeServices() {
             OSS_REGION = process.env.OSS_REGION;
             OSS_BUCKET = process.env.OSS_BUCKET;
             CDN_DOMAIN = process.env.CDN_DOMAIN;
+            MAIL_PASSWORD = process.env.MAIL_PASSWORD;
             LOCAL_DEV_OSS_ACCESS_KEY_ID = process.env.ALI_ACCESS_KEY_ID;
             LOCAL_DEV_OSS_ACCESS_KEY_SECRET = process.env.ALI_ACCESS_KEY_SECRET;
 
@@ -207,6 +210,10 @@ app.get('/image/upload', (req, res) => {
 
 app.get('/image/:id', (req, res) => {
     res.render('image-detail');
+});
+
+app.get("/send-email", (req, res) => {
+  res.render("send-email");
 });
 
 // Backend (Handling Data)
@@ -351,7 +358,34 @@ app.post('/api/comment/post', async (req, res) => {
     }
 });
 
+app.post("/api/email/post", async (req, res) => {
+  const { to, subject, message } = req.body;
 
+  let transporter = nodemailer.createTransport({
+    host: "smtpdm-ap-southeast-1.aliyuncs.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "noreply@mail.naufalichsan.com",
+      pass: MAIL_PASSWORD
+    }
+  });
+
+  const mailOptions = {
+    from: 'noreply@mail.naufalichsan.com',
+    to,
+    subject,
+    html: `<p>${message}</p>`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.send("Email sent successfully.");
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).send("Failed to send email.");
+  }
+});
 
 
 // Start server on port 3000
