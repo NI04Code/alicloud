@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
-    <link rel="stylesheet" href="/style.css">
     <style>
         /* Basic styling for the gallery */
         .gallery-container {
@@ -52,7 +51,7 @@
             padding-bottom: 20px;
         }
         .pagination button {
-            background-color: #0070c9;
+            background-color: #ff6c04;
             color: white;
             padding: 10px 15px;
             margin: 0 5px;
@@ -67,7 +66,7 @@
             cursor: not-allowed;
         }
         .pagination button:hover:not(:disabled) {
-            background-color: #005aa7;
+            background-color: #c85300;
         }
         .pagination span {
             padding: 10px 15px;
@@ -99,7 +98,7 @@
         const pageInfoSpan = document.getElementById('pageInfo');
 
         let currentPage = 1;
-        const limit = 10; // You can make this dynamic if needed
+        const limit = 5; // You can make this dynamic if needed
 
         async function fetchImages(page) {
             loadingMessage.style.display = 'block'; // Show loading message
